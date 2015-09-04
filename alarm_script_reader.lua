@@ -106,15 +106,15 @@ local function sendPushGroups( code, message )
 
 	if (pushEnabled == 0)  then
 		return false
-	else if (pushEnabled == 1) then
+	elseif (pushEnabled == 1) then
 		sendPush( pushAdminDeviceID, message )
 		return true
-	else if (pushEnabled == 2) then
+	elseif (pushEnabled == 2) then
 		sendPush( pushAdminDeviceID, message )
 		for k, v in pairs(codeTable) do
-			if ( v["allpush"] == true and compareCodeTable(code) )
+			if ( v["allpush"] == true and compareCodeTable(code) ) then
 				sendPush( v["deviceid"], message )
-			else if ( compareCodeTable(code) )
+			elseif ( compareCodeTable(code) ) then
 				sendPush( v["deviceid"], message )
 			end
 		end
@@ -125,9 +125,9 @@ end
 
 local function armingDevice( deviceId, action )
 
-	if (action == 0)
+	if (action == 0) then
 		fibaro:call( deviceId, "setArmed", "0" );
-	elseif (action == 1)
+	elseif (action == 1) then
 		fibaro:call( deviceId, "forceArm");
 	end
 	
@@ -135,7 +135,7 @@ end
 
 local function armingCheck( deviceId )
 
-	if (tonumber(fibaro:getValue(deviceId, "value")) > 0)
+	if (tonumber(fibaro:getValue(deviceId, "value")) > 0) then
 		return true
 	else
 		return false
@@ -196,95 +196,92 @@ local startSource = fibaro:getSourceTrigger()
 
 if (startSource["deviceID"] == tagReader) then
 
-if (alarmMode == 0) then
-	
-	fibaro:debug("Alarm script is deactivated. Please check the configuration if you want to enable it again.")
-	
-else if (alarmMode == 1) then
-  
-  local userCodes = fibaro:get(tagReader, "userCodes") -- Get user table from reader
-
-  jsontbl = json.decode(userCodes)
-
-  for i = 1, #jsontbl do
-  if (jsontbl[i].id == 0) then
-      
-    for b = 1, string.len(jsontbl[i].code) do 
-        readerCode[b] = string.byte(jsontbl[i].code,b)
-    end
-	
-	-- Compare codes
-    if (checkCodeTable(readerCode)) then -- Checks if the code exists in our table
-	
-		-- lets get the type from the codeTable
-		local codeType = getValueCodeTable( readerCode, "type" )
+	if (alarmMode == 0) then
 		
-	
-		if (codeType == 3) then -- Arming code here....
-		if not armingCheckTable( ) then -- Check the arm table before arming the alarm system 
+		fibaro:debug("Alarm script is deactivated. Please check the configuration if you want to enable it again.")
 		
-			sendPushGroups( "", "Sorry, but something prevents the alarm from being armed. Please check your windows and doors is closed." )
-		else
-			-- for now we will forcearm the devices... maybe later make a check code to check if arming is possible?
-			for k, v in pairs(forceArm) do
-				armingDevice( deviceId, 1 )
-			end
-		end
-			
-		else if (codeType == 1)
-		
-			for k, v in pairs(forceArm) do
-				armingDevice( deviceId, 0 )
-				
-				-- Maybe you would like turn turn off a sirene 
-				fibaro:call(sirene, "turnOff")
-				
-			end
-		
-		else if (codeType == 2)
-		
-		-- You can add your own functions here...
-		
-		-- yourCode = { 49, 50, 0, 0, 0, 0, 0, 0, 0, 0 }
-		-- if ( compareCodeTable(yourCode) ) then
-		-- fibaro:debug("Hello world!")
-		-- end
-		
-		end	
-		
-	end
+	elseif (alarmMode == 1) then
 	  
-	  
-    end 
-  end
-  end
-  end
-  
-else if (alarmMode == 2) then
-  
-		local userCodes = fibaro:get(tagReader, "userCodes") -- Get user table from reader
+	  local userCodes = fibaro:get(tagReader, "userCodes") -- Get user table from reader
 
-		jsontbl = json.decode(userCodes)
+	  jsontbl = json.decode(userCodes)
 
-		for i = 1, #jsontbl do
-		if (jsontbl[i].id == 0) then
+	  for i = 1, #jsontbl do
+	  if (jsontbl[i].id == 0) then
 		  
 		for b = 1, string.len(jsontbl[i].code) do 
 			readerCode[b] = string.byte(jsontbl[i].code,b)
 		end
-	
-		-- Print code on Fibaro scene debug page
-		fibaro:debug("Code from Reader: {" .. readerCode[1] .. ", " .. readerCode[2] .. ", " .. readerCode[3] .. ", " .. readerCode[4] .. ", " .. readerCode[5] .. ", " .. readerCode[6] .. ", " .. readerCode[7] .. ", " .. readerCode[8] .. ", " .. readerCode[9] .. ", " .. readerCode[10] .. "}")
-		fibaro:debug("You can copy and paste this into the code table..")
 		
+		-- Compare codes
+		if (checkCodeTable(readerCode)) then -- Checks if the code exists in our table
+		
+			-- lets get the type from the codeTable
+			local codeType = getValueCodeTable( readerCode, "type" )
+			
+		
+			if (codeType == 3) then -- Arming code here....
+			
+			if not armingCheckTable( ) then -- Check the arm table before arming the alarm system 
+			
+				sendPushGroups( "", "Sorry, but something prevents the alarm from being armed. Please check your windows and doors is closed." )
+			else
+				-- for now we will forcearm the devices... maybe later make a check code to check if arming is possible?
+				for k, v in pairs(forceArm) do
+					armingDevice( deviceId, 1 )
+				end
+			end
+				
+			elseif (codeType == 1) then
+			
+				for k, v in pairs(forceArm) do
+					armingDevice( deviceId, 0 )
+					
+					-- Maybe you would like turn turn off a sirene 
+					fibaro:call(sirene, "turnOff")
+					
+				end
+			
+			elseif (codeType == 2) then
+			
+			-- You can add your own functions here...
+			
+			-- yourCode = { 49, 50, 0, 0, 0, 0, 0, 0, 0, 0 }
+			-- if ( compareCodeTable(yourCode) ) then
+			-- fibaro:debug("Hello world!")
+			-- end
+			
+			end	
+			
+			end
+		  
+		  
+		end 
 		end
-		end
+	elseif (alarmMode == 2) then
+	  
+			local userCodes = fibaro:get(tagReader, "userCodes") -- Get user table from reader
 
-		end
-	  end
+			jsontbl = json.decode(userCodes)
+
+			for i = 1, #jsontbl do
+			if (jsontbl[i].id == 0) then
+			  
+			for b = 1, string.len(jsontbl[i].code) do 
+				readerCode[b] = string.byte(jsontbl[i].code,b)
+			end
+		
+			-- Print code on Fibaro scene debug page
+			fibaro:debug("Code from Reader: {" .. readerCode[1] .. ", " .. readerCode[2] .. ", " .. readerCode[3] .. ", " .. readerCode[4] .. ", " .. readerCode[5] .. ", " .. readerCode[6] .. ", " .. readerCode[7] .. ", " .. readerCode[8] .. ", " .. readerCode[9] .. ", " .. readerCode[10] .. "}")
+			fibaro:debug("You can copy and paste this into the code table..")
+			
+			end
+			end
+
+	else
+
+		fibaro:debug("Sorry the Tag/Pincode could not be found in the code table.")
+		
 	end
-else
 
-	fibaro:debug("Sorry the Tag/Pincode could not be found in the code table.")
-	
 end
